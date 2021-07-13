@@ -1,12 +1,13 @@
+""" Python Telegram Chatbot About Covi19 Cases in Turkey"""
+
+# Libraries
 import requests
-import os
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from bs4 import BeautifulSoup
 
-PORT = int(os.environ.get('PORT', 5000))
 
-
-def connectHealthDepartmantSite():
+# Web Scraping
+def connectHealthDepartmentSite():
     r = requests.get('https://www.worldometers.info/coronavirus/country/turkey/')
     source = BeautifulSoup(r.text, "lxml")
     cases = source.find("li", attrs={"class": "news_li"}).text
@@ -16,27 +17,24 @@ def connectHealthDepartmantSite():
     return case_text
 
 
-def start(update: Updater, context: CallbackContext):
-    update.message.reply_text(connectHealthDepartmantSite())
+# Sent case numbers as message.
+def case_scraping(update: Updater, context: CallbackContext):
+    update.message.reply_text(connectHealthDepartmentSite())
 
 
+# Start bot
 def main():
     # Create Updater object and attach dispatcher to it
     TOKEN = "1888765913:AAEX741SGbgo6pqgl3fbkvWT6wl8wrl3OsE"
     updater = Updater(TOKEN)
     dispatcher = updater.dispatcher
-    print("Bot started")
 
     # Add command handler to dispatcher
-    start_handler = CommandHandler('case', start)
+    start_handler = CommandHandler('case', case_scraping)
     dispatcher.add_handler(start_handler)
 
     # Start the bot
-    # updater.start_polling()
-    updater.start_webhook(listen="0.0.0.0",
-                          port=int(PORT),
-                          url_path=TOKEN)
-    updater.bot.setWebhook('https://covid19casestrbot.herokuapp.com/' + TOKEN)
+    updater.start_polling()
 
     # Run the bot until you press Ctrl-C
     updater.idle()
