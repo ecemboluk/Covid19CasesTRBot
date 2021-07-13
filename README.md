@@ -1,2 +1,0 @@
-# Covi19CasesTRBot
- 
